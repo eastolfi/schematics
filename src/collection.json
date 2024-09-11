@@ -117,6 +117,11 @@
       "description": "Create a Nest resource.",
       "schema": "./lib/resource/schema.json",
       "aliases": ["res"]
+    },
+    "crud": {
+      "factory": "./lib/crud/crud.factory#main",
+      "description": "Create a Nest CRUD resource.",
+      "schema": "./lib/crud/schema.json"
     }
   }
 }

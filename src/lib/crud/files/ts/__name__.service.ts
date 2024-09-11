@@ -1,28 +1,36 @@
-import { Injectable } from '@nestjs/common';<% if (crud && type !== 'graphql-code-first' && type !== 'graphql-schema-first') { %>
-import { Create<%= singular(classify(name)) %>Dto } from './dto/create-<%= singular(name) %>.dto';
-import { Update<%= singular(classify(name)) %>Dto } from './dto/update-<%= singular(name) %>.dto';<% } else if (crud) { %>
-import { Create<%= singular(classify(name)) %>Input } from './dto/create-<%= singular(name) %>.input';
-import { Update<%= singular(classify(name)) %>Input } from './dto/update-<%= singular(name) %>.input';<% } %>
+import { Injectable } from '@nestjs/common';
+import { prismaClient, <%= singular(classify(name)) %> } from 'prisma';
 
 @Injectable()
-export class <%= classify(name) %>Service {<% if (crud) { %>
-  create(<% if (type !== 'graphql-code-first' && type !== 'graphql-schema-first') { %>create<%= singular(classify(name)) %>Dto: Create<%= singular(classify(name)) %>Dto<% } else { %>create<%= singular(classify(name)) %>Input: Create<%= singular(classify(name)) %>Input<% } %>) {
-    return 'This action adds a new <%= lowercased(singular(classify(name))) %>';
+export class <%= classify(name) %>Service {
+  public list(): Promise<<%= singular(classify(name)) %>[]> {
+    return prismaClient.<%= singular(name) %>.findMany();
   }
 
-  findAll() {
-    return `This action returns all <%= lowercased(classify(name)) %>`;
+  public get(id: string): Promise<<%= singular(classify(name)) %>> {
+    return prismaClient.<%= singular(name) %>.findUnique({
+      where: { id },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} <%= lowercased(singular(classify(name))) %>`;
+  public create(dto: Omit<<%= singular(classify(name)) %>, 'id'>): Promise<<%= singular(classify(name)) %>> {
+    return prismaClient.<%= singular(name) %>.create({
+      data: dto,
+    });
   }
 
-  update(id: number, <% if (type !== 'graphql-code-first' && type !== 'graphql-schema-first') { %>update<%= singular(classify(name)) %>Dto: Update<%= singular(classify(name)) %>Dto<% } else { %>update<%= singular(classify(name)) %>Input: Update<%= singular(classify(name)) %>Input<% } %>) {
-    return `This action updates a #${id} <%= lowercased(singular(classify(name))) %>`;
+  public update(id: string, body: Partial<<%= singular(classify(name)) %>>): Promise<<%= singular(classify(name)) %>> {
+    return prismaClient.<%= singular(name) %>.update({
+      where: { id },
+      data: {
+        ...body,
+      },
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} <%= lowercased(singular(classify(name))) %>`;
+  public remove(id: string): Promise<<%= singular(classify(name)) %>> {
+    return prismaClient.<%= singular(name) %>.delete({
+      where: { id },
+    });
   }
-<% } %>}
+}

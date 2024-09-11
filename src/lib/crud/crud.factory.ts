@@ -27,9 +27,9 @@ import {
 import { normalizeToKebabOrSnakeCase } from '../../utils/formatting';
 import { Location, NameParser } from '../../utils/name.parser';
 import { mergeSourceRoot } from '../../utils/source-root.helpers';
-import { ResourceOptions } from './resource.schema';
+import { CrudOptions } from './crud.schema';
 
-export function main(options: ResourceOptions): Rule {
+export function main(options: CrudOptions): Rule {
   options = transform(options);
 
   return (tree: Tree, context: SchematicContext) => {
@@ -44,8 +44,8 @@ export function main(options: ResourceOptions): Rule {
   };
 }
 
-function transform(options: ResourceOptions): ResourceOptions {
-  const target: ResourceOptions = Object.assign({}, options);
+function transform(options: CrudOptions): CrudOptions {
+  const target: CrudOptions = Object.assign({}, options);
   if (!target.name) {
     throw new SchematicsException('Option (name) is required.');
   }
@@ -72,59 +72,15 @@ function transform(options: ResourceOptions): ResourceOptions {
   return target;
 }
 
-function generate(options: ResourceOptions): Source {
+function generate(options: CrudOptions): Source {
   return (context: SchematicContext) =>
     apply(url(join('./files' as Path, options.language)), [
-      filter((path) => {
-        if (path.endsWith('.dto.ts')) {
-          return (
-            options.type !== 'graphql-code-first' &&
-            options.type !== 'graphql-schema-first' &&
-            options.crud
-          );
-        }
-        if (path.endsWith('.input.ts')) {
-          return (
-            (options.type === 'graphql-code-first' ||
-              options.type === 'graphql-schema-first') &&
-            options.crud
-          );
-        }
-        if (
-          path.endsWith('.resolver.ts') ||
-          path.endsWith('.resolver.__specFileSuffix__.ts')
-        ) {
-          return (
-            options.type === 'graphql-code-first' ||
-            options.type === 'graphql-schema-first'
-          );
-        }
-        if (path.endsWith('.graphql')) {
-          return options.type === 'graphql-schema-first' && options.crud;
-        }
-        if (
-          path.endsWith('controller.ts') ||
-          path.endsWith('.controller.__specFileSuffix__.ts')
-        ) {
-          return options.type === 'microservice' || options.type === 'rest';
-        }
-        if (path.endsWith('.gateway.ts') || path.endsWith('.gateway.__specFileSuffix__.ts')) {
-          return options.type === 'ws';
-        }
-        if (path.includes('@ent')) {
-          // Entity class file workaround
-          // When an invalid glob path for entities has been specified (on the application part)
-          // TypeORM was trying to load a template class
-          return options.crud;
-        }
-        return true;
-      }),
-      options.spec 
-        ? noop() 
+      options.spec
+        ? noop()
         : filter((path) => {
             const suffix = `.__specFileSuffix__.ts`;
-            return !path.endsWith(suffix)
-        }),
+            return !path.endsWith(suffix);
+          }),
       template({
         ...strings,
         ...options,
@@ -141,7 +97,7 @@ function generate(options: ResourceOptions): Source {
     ])(context);
 }
 
-function addDeclarationToModule(options: ResourceOptions): Rule {
+function addDeclarationToModule(options: CrudOptions): Rule {
   return (tree: Tree) => {
     if (options.skipImport !== undefined && options.skipImport) {
       return tree;
@@ -166,21 +122,16 @@ function addDeclarationToModule(options: ResourceOptions): Rule {
   };
 }
 
-function addMappedTypesDependencyIfApplies(options: ResourceOptions): Rule {
+function addMappedTypesDependencyIfApplies(options: CrudOptions): Rule {
   return (host: Tree, context: SchematicContext) => {
     try {
-      if (options.type === 'graphql-code-first') {
+      const nodeSwaggerDependencyRef = getPackageJsonDependency(
+        host,
+        '@nestjs/swagger',
+      );
+      if (nodeSwaggerDependencyRef) {
+        options.isSwaggerInstalled = true;
         return;
-      }
-      if (options.type === 'rest') {
-        const nodeDependencyRef = getPackageJsonDependency(
-          host,
-          '@nestjs/swagger',
-        );
-        if (nodeDependencyRef) {
-          options.isSwaggerInstalled = true;
-          return;
-        }
       }
       const nodeDependencyRef = getPackageJsonDependency(
         host,
@@ -194,6 +145,7 @@ function addMappedTypesDependencyIfApplies(options: ResourceOptions): Rule {
         });
         context.addTask(new NodePackageInstallTask());
       }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
       // ignore if "package.json" not found
     }
