@@ -7,7 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { <%= singular(classify(name)) %> } from 'prisma';
+import { <%= singular(classify(name)) %> } from '@repo/database';
 import { <%= classify(name) %>Service } from './<%= name %>.service';
 
 @Controller('<%= dasherize(name) %>')
@@ -30,7 +30,10 @@ export class <%= classify(name) %>Controller {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<<%= singular(classify(name)) %>>): Promise<<%= singular(classify(name)) %>> {
+  update(
+    @Param('id') id: string,
+    @Body() dto: Partial<<%= singular(classify(name)) %>>
+  ): Promise<<%= singular(classify(name)) %>> {
     return this.<%= lowercased(name) %>Service.update(id, dto);
   }
 

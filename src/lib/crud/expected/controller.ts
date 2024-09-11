@@ -7,7 +7,7 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { User } from 'prisma';
+import { User } from '@ewpo/database';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -30,7 +30,10 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<User>): Promise<User> {
+  update(
+    @Param('id') id: string,
+    @Body() dto: Partial<User>
+  ): Promise<User> {
     return this.usersService.update(id, dto);
   }
 
