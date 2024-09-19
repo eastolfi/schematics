@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { prisma, <%= singular(classify(name)) %> } from '@repo/database';
+import { <%= singular(classify(name)) %> } from '@repo/database';
+import { PrismaService } from '@src/prisma/prisma.service';
 
 @Injectable()
 export class <%= classify(name) %>Service {
+  constructor(private readonly prisma: PrismaService) {}
+
   public list(): Promise<<%= singular(classify(name)) %>[]> {
-    return prisma.<%= singular(name) %>.findMany();
+    return this.prisma.<%= singular(name) %>.findMany();
   }
 
   public get(id: string): Promise<<%= singular(classify(name)) %>> {
-    return prisma.<%= singular(name) %>.findUnique({
+    return this.prisma.<%= singular(name) %>.findUnique({
       where: { id },
     });
   }
 
   public create(dto: Omit<<%= singular(classify(name)) %>, 'id'>): Promise<<%= singular(classify(name)) %>> {
-    return prisma.<%= singular(name) %>.create({
+    return this.prisma.<%= singular(name) %>.create({
       data: dto,
     });
   }
 
   public update(id: string, body: Partial<<%= singular(classify(name)) %>>): Promise<<%= singular(classify(name)) %>> {
-    return prisma.<%= singular(name) %>.update({
+    return this.prisma.<%= singular(name) %>.update({
       where: { id },
       data: {
         ...body,
@@ -29,7 +32,7 @@ export class <%= classify(name) %>Service {
   }
 
   public remove(id: string): Promise<<%= singular(classify(name)) %>> {
-    return prisma.<%= singular(name) %>.delete({
+    return this.prisma.<%= singular(name) %>.delete({
       where: { id },
     });
   }

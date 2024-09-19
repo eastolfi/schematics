@@ -7,7 +7,8 @@ import {
   Patch,
   Post,
 } from '@nestjs/common';
-import { User } from '@ewpo/database';
+import { ApiBody, OmitType, PartialType } from '@nestjs/swagger';
+import { User } from '@src/dto/prisma/user';
 import { UsersService } from './users.service';
 
 @Controller('users')
@@ -25,11 +26,17 @@ export class UsersController {
   }
 
   @Post()
+  @ApiBody({
+    type: OmitType(User, ['id']),
+  })
   create(@Body() dto: Omit<User, 'id'>): Promise<User> {
     return this.usersService.create(dto);
   }
 
   @Patch(':id')
+  @ApiBody({
+    type: PartialType(OmitType(User, ['id'])),
+  })
   update(
     @Param('id') id: string,
     @Body() dto: Partial<User>

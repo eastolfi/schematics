@@ -1,26 +1,29 @@
 import { Injectable } from '@nestjs/common';
-import { prisma, User } from '@repo/database';
+import { User } from '@repo/database';
+import { PrismaService } from '@src/prisma/prisma.service';
 
 @Injectable()
 export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
+
   public list(): Promise<User[]> {
-    return prisma.user.findMany();
+    return this.prisma.user.findMany();
   }
 
   public get(id: string): Promise<User> {
-    return prisma.user.findUnique({
+    return this.prisma.user.findUnique({
       where: { id },
     });
   }
 
   public create(dto: Omit<User, 'id'>): Promise<User> {
-    return prisma.user.create({
+    return this.prisma.user.create({
       data: dto,
     });
   }
 
   public update(id: string, body: Partial<User>): Promise<User> {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id },
       data: {
         ...body,
@@ -29,7 +32,7 @@ export class UsersService {
   }
 
   public remove(id: string): Promise<User> {
-    return prisma.user.delete({
+    return this.prisma.user.delete({
       where: { id },
     });
   }
