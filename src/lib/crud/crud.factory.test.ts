@@ -20,6 +20,7 @@ describe('CRUD Factory', () => {
       const tree = await runner.runSchematic('crud', options);
       const files = tree.files;
       expect(files).toEqual([
+        '/users/user.mapper.ts',
         '/users/users.controller.ts',
         '/users/users.controller.spec.ts',
         '/users/users.module.ts',
@@ -34,6 +35,7 @@ describe('CRUD Factory', () => {
       const tree = await runner.runSchematic('crud', options);
       const files = tree.files;
       expect(files).toEqual([
+        '/_users/_user.mapper.ts',
         '/_users/_users.controller.ts',
         '/_users/_users.controller.spec.ts',
         '/_users/_users.module.ts',
@@ -50,6 +52,7 @@ describe('CRUD Factory', () => {
         const tree = await runner.runSchematic('crud', options);
         const files = tree.files;
         expect(files).toEqual([
+          '/users/user.mapper.ts',
           '/users/users.controller.ts',
           '/users/users.module.ts',
           '/users/users.service.ts',
